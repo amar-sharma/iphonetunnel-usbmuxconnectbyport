@@ -101,7 +101,9 @@ int parse_args(int argc, char *argv [])
 			pIntOpt = &g_local_port; newMode = MODE_TUNNEL;
 		} else if (!strcmp(arg, "--verbose")) {
 			pIntOpt = &g_logSeverity;
-		} else {
+        } else if (!strcmp(arg, "--udid")) {
+            pOpt = &g_device_id; newMode = MODE_TUNNEL;
+        } else {
 			return EXIT_BAD_OPTIONS;
 		}
 
@@ -135,8 +137,8 @@ printf(
 			"\niphone_tunnel v2.0 for Win/Mac\n"
 			"Created by novi. (novi.mad@gmail.com)\n"
 			"Restore mode hack by msft.guy ((rev 5))\n"
-			"\n"
-			"Usage: iphone_tunnel --tunnel [--iport <iPhone port>] [--lport <Local port>]\n"
+			"Selecting UDID by Amar Sharma (amarsharma.hacker@gmail.com)\n\n"
+			"Usage: iphone_tunnel --tunnel [--iport <iPhone port>] [--lport <Local port>] [--udid <UDID of iOS Device>]\n"
 			"OR: iphone_tunnel --autoboot\tto kick out of the recovery mode\n"
 			"OR: iphone_tunnel [--ibss <iBSS file>] [--exploit <iBSS USB exploit payload>]\n"
 			"\t[--ibec <iBEC file>] [--ramdisk <ramdisk file>]\n"
@@ -183,6 +185,9 @@ int main (int argc, char *argv [])
 	case MODE_TUNNEL:
 		libmd_start_mux_tunnel(g_local_port, g_iphone_port);
 		break;
+    default:
+            usage();
+            break;
 	}
 
 	return 0;
