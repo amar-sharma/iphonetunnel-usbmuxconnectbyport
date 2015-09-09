@@ -183,7 +183,7 @@ int main (int argc, char *argv [])
 #endif
             break;
 	case MODE_TUNNEL:
-		libmd_start_mux_tunnel(g_local_port, g_iphone_port);
+		libmd_start_mux_tunnel(g_local_port, g_iphone_port, g_device_id);
 		break;
     default:
             usage();

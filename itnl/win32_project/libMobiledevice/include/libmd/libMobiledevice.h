@@ -131,7 +131,7 @@ LIBMD_API extern log_function_t g_logFunction;
 
 LIBMD_API void libmd_set_recovery_callback(recovery_callback_t callback, void* ctx);
 
-LIBMD_API LIBMD_ERROR libmd_start_mux_tunnel(int localPort, int remotePort);
+LIBMD_API LIBMD_ERROR libmd_start_mux_tunnel(int localPort, int remotePort, char *deviceId);
 
 LIBMD_API void libmd_set_autoboot(AMRecoveryModeDevice device, bool autoboot);
 

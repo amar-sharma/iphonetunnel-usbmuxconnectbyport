@@ -100,7 +100,7 @@ void libmd_set_recovery_callback(recovery_callback_t callback, void* clientCtx)
 	AMRestoreRegisterForDeviceNotifications(dfu_connect_callback, recovery_connect_callback, dfu_disconnect_callback, recovery_disconnect_callback, 0, ctx);
 }
 
-LIBMD_ERROR libmd_start_mux_tunnel(int localPort, int remotePort)
+LIBMD_ERROR libmd_start_mux_tunnel(int localPort, int remotePort, char* deviceId)
 {
 	struct sockaddr_in saddr;
 	int ret = 0;
@@ -133,9 +133,10 @@ LIBMD_ERROR libmd_start_mux_tunnel(int localPort, int remotePort)
 
 	Log(LOG_INFO, "Waiting for new TCP connection on port %hu", localPort);
 
-	Log(LOG_INFO, "Waiting for device...");
-	fflush(stdout);
+	Log(LOG_INFO, "Waiting for input...");
 
+    fflush(stdout);
+    scanf("%d",&lpThreadId);
 	while (1) {
 		am_device_callbacks_t callbacks; 
 		ret = AMDeviceNotificationSubscribe(notification, 0, 0, 0, &callbacks);
