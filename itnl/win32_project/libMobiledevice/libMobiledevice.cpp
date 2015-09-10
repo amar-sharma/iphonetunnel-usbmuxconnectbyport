@@ -57,6 +57,8 @@ static muxconn_t muxConn = 0;
 
 static am_device_t target_device = NULL;
 
+static char* target_device_id;
+
 typedef struct CB_CTX {
 	void* clientCtx;
 	recovery_callback_t clientCallback;
@@ -104,7 +106,7 @@ LIBMD_ERROR libmd_start_mux_tunnel(int localPort, int remotePort, char* deviceId
 {
 	struct sockaddr_in saddr;
 	int ret = 0;
-
+    target_device_id = deviceId;
 	memset(&saddr, 0, sizeof(saddr));
 	saddr.sin_family = AF_INET;
 	saddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
@@ -126,19 +128,18 @@ LIBMD_ERROR libmd_start_mux_tunnel(int localPort, int remotePort, char* deviceId
 
 	listen(sock, 0);
 			
-	int lpThreadId;
+	int lpThreadId,lol;
 	pthread_t socket_thread;
 	lpThreadId = pthread_create(&socket_thread, NULL, wait_for_device, (void*)remotePort);
 	pthread_detach(socket_thread);
 
 	Log(LOG_INFO, "Waiting for new TCP connection on port %hu", localPort);
 
-	Log(LOG_INFO, "Waiting for input...");
+	Log(LOG_INFO, "Waiting for device %s ...",deviceId);
 
-    fflush(stdout);
-    scanf("%d",&lpThreadId);
 	while (1) {
-		am_device_callbacks_t callbacks; 
+		am_device_callbacks_t callbacks;
+
 		ret = AMDeviceNotificationSubscribe(notification, 0, 0, 0, &callbacks);
 		if (ret != ERR_SUCCESS) {
 				Log(LOG_ERROR, "AMDeviceNotificationSubscribe = %i", ret);
@@ -175,11 +176,12 @@ void notification(struct am_device_notification_callback_info* info)
 	{
 	case ADNCI_MSG_CONNECTED:
         {
-            int interfaceType = AMDeviceGetInterfaceType(info->dev);   
-            int ignore = interfaceType != 1;
-            Log(LOG_INFO, "Device connected: %s%s", getConnectedDeviceName(info), 
-                ignore ? " - Ignoring (non-USB)" : "");
+            int interfaceType = AMDeviceGetInterfaceType(info->dev);
+            char *deviceId = getConnectedDeviceName(info);
+            int ignore = (interfaceType != 1 || strcmp(deviceId,target_device_id));
+
             if (!ignore) {
+                Log(LOG_INFO, "Device connected: %s", deviceId);
                 target_device = info->dev;
             }
         }
@@ -203,14 +205,12 @@ void* THREADPROCATTR wait_for_device(void* arg)
 	int ret;
 	int handle = -1;
 	restore_dev_t restore_dev;
-			
 	while (1) {
 		
 		if (target_device == NULL) {
 			sleep(1);
 			continue;
 		}
-								
 		struct sockaddr_in sockAddrin;
 		socklen_t len = sizeof(sockAddrin);
 		int new_sock = accept(sock, (struct sockaddr*) &sockAddrin , &len);
