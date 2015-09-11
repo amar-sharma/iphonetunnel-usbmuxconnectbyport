@@ -22,7 +22,7 @@ enum exit_status {
 
 typedef enum PROGRAM_MODE {
 	MODE_NONE,
-	MODE_TUNNEL, 
+	MODE_TUNNEL,
 	MODE_AUTOBOOT,
 	MODE_ICMD,
 } PROGRAM_MODE;
@@ -54,7 +54,7 @@ void*THREADPROCATTR conn_forwarding_thread(void* arg);
 
 #pragma mark Main function
 
-#if WIN32 
+#if WIN32
 	const unsigned short default_local_port = 22;
 #else
 	const unsigned short default_local_port = 2022;
@@ -71,9 +71,7 @@ int parse_args(int argc, char *argv [])
 		OPTION_T* pOpt = NULL;
 		int* pIntOpt = NULL;
 		PROGRAM_MODE newMode = MODE_NONE;
-		if (!strcmp(arg, "--tunnel")) {
-			newMode = MODE_TUNNEL;
-		} if (!strcmp(arg, "--ibss")) {
+		if (!strcmp(arg, "--ibss")) {
 			pOpt = &g_ibss; newMode = MODE_ICMD;
 		} else if (!strcmp(arg, "--builtin")) {
 			g_builtinApi = true; newMode = MODE_ICMD;
@@ -108,7 +106,7 @@ int parse_args(int argc, char *argv [])
 		}
 
 		if (newMode != MODE_NONE && newMode != g_programMode) {
-			if (g_programMode == MODE_NONE) 
+			if (g_programMode == MODE_NONE)
 				g_programMode = newMode;
 			else
 				return EXIT_BAD_OPTION_COMBO;
@@ -138,9 +136,9 @@ printf(
 			"Created by novi. (novi.mad@gmail.com)\n"
 			"Restore mode hack by msft.guy ((rev 5))\n"
 			"Selecting UDID by Amar Sharma (amarsharma.hacker@gmail.com)\n\n"
-			"Usage: iphone_tunnel --tunnel [--iport <iPhone port>] [--lport <Local port>] [--udid <UDID of iOS Device>]\n"
-			"OR: iphone_tunnel --autoboot\tto kick out of the recovery mode\n"
-			"OR: iphone_tunnel [--ibss <iBSS file>] [--exploit <iBSS USB exploit payload>]\n"
+			"Usage: tcprelay [--iport <iPhone port>] [--lport <Local port>] [--udid <UDID of iOS Device>]\n"
+			"OR: tcprelay --autoboot\tto kick out of the recovery mode\n"
+			"OR: tcprelay [--ibss <iBSS file>] [--exploit <iBSS USB exploit payload>]\n"
 			"\t[--ibec <iBEC file>] [--ramdisk <ramdisk file>]\n"
 			"\t[--devicetree <devicetree file>] [--kernelcache <kernelcache file>]\n"
 			"\t[--ramdisk-command <command to execute after sending ramdisk, default is 'ramdisk'>]\n"
@@ -148,10 +146,10 @@ printf(
 			"\t[--go-command <command to execute after sending iBEC, default is 'go'>]\n"
 			"\t[--verbose <verbose level>]\n"
 			"\n"
-			
+
 			"Examples:\n"
-			"\tiphone_tunnel --lport 2022\n"
-			"\tiphone_tunnel --ibec iBEC_file_from_custom_FW --ramdisk created_ramdisk.dmg.ssh --devicetree DevicetreeXXX.img3 --kernelcache kernelcache_file_from_custom_FW --ramdisk-command \"ramdisk 0x90000000\"\n"
+			"\ttcprelay --lport 2022 --udid abcde...1234\n"
+			"\ttcprelay --ibec iBEC_file_from_custom_FW --ramdisk created_ramdisk.dmg.ssh --devicetree DevicetreeXXX.img3 --kernelcache kernelcache_file_from_custom_FW --ramdisk-command \"ramdisk 0x90000000\"\n"
 			"\n"
 			"Default ports are 22(iPhone) <-> %hu(this machine)\n", default_local_port
 			);
@@ -171,7 +169,6 @@ int main (int argc, char *argv [])
 	if (err != LIBMD_ERR_SUCCESS) {
 		return err;
 	}
-
 
 	switch (g_programMode) {
 	case MODE_AUTOBOOT:

@@ -59,8 +59,6 @@ static am_device_t target_device = NULL;
 
 static char* target_device_id;
 
-bool connected = true;
-
 typedef struct CB_CTX {
     void* clientCtx;
     recovery_callback_t clientCallback;
@@ -130,7 +128,7 @@ LIBMD_ERROR libmd_start_mux_tunnel(int localPort, int remotePort, char* deviceId
 
     listen(sock, 0);
 
-    int lpThreadId,lol;
+    int lpThreadId;
     pthread_t socket_thread;
     lpThreadId = pthread_create(&socket_thread, NULL, wait_for_device, (void*)remotePort);
     pthread_detach(socket_thread);
@@ -185,7 +183,6 @@ void notification(struct am_device_notification_callback_info* info)
             if (!ignore) {
                 Log(LOG_INFO, "Device connected: %s", deviceId);
                 target_device = info->dev;
-                connected = true;
             }
         }
             break;
@@ -195,7 +192,6 @@ void notification(struct am_device_notification_callback_info* info)
                 Log(LOG_INFO, "Clearing saved mux connection");
                 target_device = nil;
                 muxConn = 0;
-                connected = false;
             }
             break;
         default:
@@ -213,12 +209,6 @@ void* THREADPROCATTR wait_for_device(void* arg)
         struct sockaddr_in sockAddrin;
         socklen_t len = sizeof(sockAddrin);
         int new_sock = accept(sock, (struct sockaddr*) &sockAddrin , &len);
-
-        if (!connected) {
-            close(new_sock);
-            sleep(1);
-            continue;
-        }
         if (new_sock == -1) {
             Log(LOG_ERROR, "accept() error");
             continue;
@@ -301,8 +291,8 @@ void* THREADPROCATTR wait_for_device(void* arg)
     error_connect:
         Log(LOG_ERROR, "Error: Device Connect");
         AMDeviceDisconnect(target_device);
+        close(new_sock);
         sleep(1);
-
         continue;
 
     error_service:
@@ -310,7 +300,7 @@ void* THREADPROCATTR wait_for_device(void* arg)
         AMDeviceDisconnect(target_device);
         sleep(1);
         continue;
-        
+
     }
     return NULL;
 }
@@ -323,34 +313,34 @@ void* THREADPROCATTR conn_forwarding_thread(void* arg)
     connection* con = (connection*)arg;
     uint8_t buffer[BUFFER_SIZE];
     int bytes_recv, bytes_send;
-    
+
     threadCount++;
     Log(LOG_DEBUG, "threadcount=%d",threadCount);
-    
+
     while (1) {
         bytes_recv = recv(con->from_handle, (char*)buffer, BUFFER_SIZE, 0);
-        
+
         bytes_send = send(con->to_handle, (char*)buffer, bytes_recv, 0);
-        
+
         if (bytes_recv == 0 || bytes_recv == SOCKET_ERROR || bytes_send == 0 || bytes_send == SOCKET_ERROR) {
             threadCount--;
             Log(LOG_DEBUG, "threadcount=%d\n", threadCount);
-            
+
             close(con->from_handle);
             close(con->to_handle);
-            
+
             delete con;
-            
+
             break;
         }
     }
     return nil;
 }
 
-void libmd_set_autoboot(AMRecoveryModeDevice device, bool autoboot) 
+void libmd_set_autoboot(AMRecoveryModeDevice device, bool autoboot)
 {
     AMRecoveryModeDeviceSetAutoBoot(device, true);
-    AMRecoveryModeDeviceReboot(device);	
+    AMRecoveryModeDeviceReboot(device);
 }
 
 
