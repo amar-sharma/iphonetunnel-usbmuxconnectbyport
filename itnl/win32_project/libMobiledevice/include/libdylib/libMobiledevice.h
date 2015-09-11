@@ -24,8 +24,8 @@
 #endif //_LIBMD_BUILD
 #endif //WIN32
 
-#include <libdylib/platform.h>
-#include <libdylib/error.h>
+#include <libmd/platform.h>
+#include <libmd/error.h>
 
 #define ADNCI_MSG_CONNECTED     1
 #define ADNCI_MSG_DISCONNECTED  2
