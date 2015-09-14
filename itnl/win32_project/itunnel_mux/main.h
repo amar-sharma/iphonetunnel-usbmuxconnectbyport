@@ -8,5 +8,5 @@
 #include "log.h"
 #include "options.h"
 #include "recovery.h"
-
+#include <stdlib.h>
 #endif

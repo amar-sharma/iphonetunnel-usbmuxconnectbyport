@@ -9,6 +9,7 @@ char g_devicetree  [BUFSIZ]	= "";
 char g_kernelcache [BUFSIZ]	= "";
 char g_ramdiskCmd  [BUFSIZ]	= "ramdisk";
 char g_goCmd       [BUFSIZ] = "go";
+char g_device_id   [BUFSIZ] = "";
 bool g_autoboot				= FALSE;
 bool g_builtinApi			= FALSE;
 int g_ramdiskDelay			= 5;
